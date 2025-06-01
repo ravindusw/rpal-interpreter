@@ -210,7 +210,7 @@ class LexicalAnalyzer:
             list: A list of tokens.
         """
         while not self.scanner.is_at_end():
-            print("Scanned so far: ", [str(x.lexeme) for x in self.tokens])
+            print("Scanned so far: %s", [str(x.lexeme) for x in self.tokens])
             self.scan_token()
         
         # Add EOF token at the end
@@ -238,12 +238,6 @@ def main():
     print("Source Code:")
     print(source_code)
 
-    # Convert source code into string format
-    # print("\nConverting source code to string format...")
-    # source_code = str(source_code)
-    # print("Converted Source Code:")
-    # print(source_code)
-
     analyzer = LexicalAnalyzer(source_code)
     tokens = analyzer.get_tokens()
     
@@ -253,5 +247,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # Example usage
     main()
