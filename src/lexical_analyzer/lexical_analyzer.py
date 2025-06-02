@@ -1,5 +1,5 @@
-from scanner import Scanner
-from token import Token, TokenType
+from .scanner import Scanner
+from .token import Token, TokenType
 
 class LexicalAnalyzer:
     """
@@ -53,6 +53,10 @@ class LexicalAnalyzer:
         #     return self.tokens[-1]
         
         char = self.scanner.advance()
+
+        if char is None:
+            return None  # End of file reached
+
         line, column = self.scanner.current_position()
         column -= 1  # Adjust column for the current character
 

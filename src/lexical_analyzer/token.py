@@ -20,6 +20,7 @@ class TokenType:
     DUMMY = "dummy"
     WITHIN = "within"
     REC = "rec"
+    LIST = "list"
 
     # Punction
     LEFT_PAREN = "("
