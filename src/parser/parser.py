@@ -1,11 +1,10 @@
 from src.lexical_analyzer.token import Token, TokenType
-# from src.lexical_analyzer.lexical_analyzer import LexicalAnalyzer
 from .utils import Node, Stack
 
 class Parser:
     """
     Parser for the RPAL language.
-    Converts a stream of tokens into a derivation tree.
+    Converts a stream of tokens into an abstract syntax tree.
     """
     
     def __init__(self, tokens):
@@ -17,7 +16,7 @@ class Parser:
         """
         self.tokens = tokens
         self.current_token_index = 0
-        self.token_stack = Stack()
+        self.token_stack = Stack() # Stack to hold nodes of the abstract syntax tree
 
     def get_current_token(self):
         """
@@ -32,7 +31,7 @@ class Parser:
     
     def consume_token(self):
         """
-        Consume the current token and update the current_index_token
+        Consume the current token and update the current_token_index
         """
         print(self.get_current_token())
         self.current_token_index += 1
@@ -55,7 +54,7 @@ class Parser:
 
     def preorder_traversal(self, node, dots=""):
         """
-        Perform a preorder traversal of the tree and print the nodes.
+        Perform a preorder traversal of the abstract syntax tree and print the nodes.
         
         Args:
             node (Node): The root node of the tree.
@@ -66,7 +65,11 @@ class Parser:
         self.preorder_traversal(node.left, dots+".")
         self.preorder_traversal(node.right, dots)
 
-    def ast(self):
+    def parse(self):
+        """
+        Parse the token stream and build a derivation tree.
+        """
+        self.E()
         self.preorder_traversal(self.token_stack.peek())
 
     
@@ -650,13 +653,6 @@ class Parser:
         else:
             raise SyntaxError(f"Unexpected token: {token}")
     
-    
-    def parse(self):
-        """
-        Parse the token stream and build a derivation tree.
-        """
-        self.E()
-        self.preorder_traversal(self.token_stack.peek())
 
 def main():
     # Example usage of the Parser

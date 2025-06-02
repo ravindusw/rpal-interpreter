@@ -1,12 +1,12 @@
 class Node:
     """
-    A class representing a node in a derivation tree.
-    Each node contains a value and a list of child nodes.
+    A class representing a node in the abstract syntax tree
+    Each node contains a value and a left and right children.
     """
 
     def __init__(self, value, left, right):
         """
-        Initialize a new node with a given value.
+        Initialize a new node.
 
         Attributes:
             value (str): The value of the node.
