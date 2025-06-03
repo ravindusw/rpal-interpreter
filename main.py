@@ -1,9 +1,10 @@
 from src.lexical_analyzer.lexical_analyzer import LexicalAnalyzer
 from src.parser.parser import Parser
 from src.standardizer.standardizer import Standardizer
+from src.cse_machine.cse_machine import CSEMachine
 
 def main():
-    with open("./examples/sample16.txt", "r") as file:
+    with open("./examples/sample7.txt", "r") as file:
         print("Reading source code from 'examples/sample.txt'...")
         source_code = file.read().strip()
     print("Source code read successfully.")
@@ -26,6 +27,10 @@ def main():
     standardizer.print_standardized_tree()
 
     print("Standardization completed successfully.")
+
+    cse_machine = CSEMachine()
+    cse_machine.setup_control_structures(standardizer.standardized_tree)
+    print(f"\n {cse_machine.control_structures}")
 
 if __name__ == "__main__":
     main()
