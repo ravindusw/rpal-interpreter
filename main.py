@@ -4,7 +4,7 @@ from src.standardizer.standardizer import Standardizer
 from src.cse_machine.cse_machine import CSEMachine
 
 def main():
-    with open("./examples/sample7.txt", "r") as file:
+    with open("./examples/sample1.txt", "r") as file:
         print("Reading source code from 'examples/sample.txt'...")
         source_code = file.read().strip()
     print("Source code read successfully.")
@@ -28,9 +28,10 @@ def main():
 
     print("Standardization completed successfully.")
 
-    cse_machine = CSEMachine()
-    cse_machine.setup_control_structures(standardizer.standardized_tree)
-    print(f"\n {cse_machine.control_structures}")
+    cse_machine = CSEMachine(standardizer.standardized_tree)
+    result = cse_machine.evaluate()
+    print("CSE Machine evaluation result:")
+    print(result)
 
 if __name__ == "__main__":
     main()

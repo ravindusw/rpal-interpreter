@@ -16,7 +16,8 @@ class Environment:
         self.env_id = id # Unique identifier for the environment
 
     def __repr__(self):
-        return f"Environment(id={self.env_id}, bindings={self.bindings})"
+        # return f"Environment(id={self.env_id}, bindings={self.bindings})"
+        return f"e_{self.env_id}"
     
     def __str__(self):
         return f"e_{self.env_id}"

@@ -1,0 +1,20 @@
+e_0, gamma, <None lambda 1 ['<ID:X>']>
+
+e_0, gamma
+
+e_0, e_1, tau_2, <ID:X>, **, <ID:X>, <INT:2>
+
+e_0, e_1, tau_2, <ID:X>, **, <ID:X>
+
+e_0, e_1, tau_2, <ID:X>, **
+
+e_0, e_1, tau_2, <ID:X>
+
+e_0, e_1, tau_2
+
+e_0, e_1
+
+e_0
+
+
+
