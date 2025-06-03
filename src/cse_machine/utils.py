@@ -67,6 +67,17 @@ class Environment:
             return self.parent.contains(name)
         else:
             return False
+        
+    def print_parent_stack(self):
+        """
+        Print the parent environment stack for debugging purposes.
+        """
+        env = self
+        stack = []
+        while env is not None:
+            stack.append(env.env_id)
+            env = env.parent
+        print("Parent Environment Stack:", " -> ".join(map(str, reversed(stack))))
 
 
 class Closure:
@@ -140,16 +151,18 @@ class BuiltinFunction:
     """
     Represents a built-in function.
     """
-    def __init__(self, name, func):
+    def __init__(self, name, func, arity):
         """
         Initialize a new built-in function.
         
         Args:
             name (str): The name of the built-in function.
             func (callable): The function to be executed.
+            arity (int): The number of arguments the function expects.
         """
         self.name = name
         self.func = func
+        self.arity = arity
 
     def __str__(self):
         return f"F_{self.name}"
@@ -178,7 +191,7 @@ class ControlStructure:
         Initialize a new control structure.
         
         Args:
-            cs_id (int): The identifier of the control structure.
+            cs_id (int | str): The identifier of the control structure. (str for '->' (i.e.conditions))
             body (list): The body of the control structure.
         """
         self.cs_id = cs_id

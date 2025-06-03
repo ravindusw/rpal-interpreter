@@ -1,2 +1,2 @@
 let Inc = fn x. x + 1 
-    in Print (Inc x)
+    in Print (Inc 5)

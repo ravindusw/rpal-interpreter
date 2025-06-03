@@ -10,21 +10,22 @@ class CSEMachine:
         """
         Initialize the CSE machine.
         """
+        self.env_stack = [Environment(0)]  # Start with the initial environment
         self.control_stack = []
         self.value_stack = []
         self.control_structures = {}
-        self.current_env = Environment(0)
+        # self.current_env = Environment(0)
         self.last_env_id = 0
+        self.last_cs_id = 1
 
         self.initiate(st) # Set up the initial environment and built-in functions
 
     def initiate(self, st):
         self.setup_builtin_functions()
         self.setup_control_structures(st)
-        self.control_stack.append(self.current_env)
+        self.control_stack.append(self.env_stack[-1])  # Start with the initial environment on the control stack
         self.control_stack += (self.control_structures[0].body)  # Start with the main control structure
-        print(self.control_stack)
-        self.value_stack.append(self.current_env)
+        self.value_stack.append(self.env_stack[-1])  # Push the initial environment onto the value stack
 
 
     # Builtin Functions ###############
@@ -32,28 +33,30 @@ class CSEMachine:
     def setup_builtin_functions(self):
         """Set up built-in functions in the initial environment."""
         builtins = {
-            'Print': BuiltinFunction('Print', self._builtin_print),
-            'Isinteger': BuiltinFunction('Isinteger', self._builtin_isinteger),
-            'Istruthvalue': BuiltinFunction('Istruthvalue', self._builtin_istruthvalue),
-            'Isstring': BuiltinFunction('Isstring', self._builtin_isstring),
-            'Istuple': BuiltinFunction('Istuple', self._builtin_istuple),
-            'Isfunction': BuiltinFunction('Isfunction', self._builtin_isfunction),
-            'Isdummy': BuiltinFunction('Isdummy', self._builtin_isdummy),
-            'Stem': BuiltinFunction('Stem', self._builtin_stem),
-            'Stern': BuiltinFunction('Stern', self._builtin_stern),
-            'Conc': BuiltinFunction('Conc', self._builtin_conc),
-            'ItoS': BuiltinFunction('ItoS', self._builtin_itos),
-            'Order': BuiltinFunction('Order', self._builtin_order),
-            'Null': BuiltinFunction('Null', self._builtin_null),
+            'Print': BuiltinFunction('Print', self._builtin_print, -1),  # -1 indicates variable arity
+            'Isinteger': BuiltinFunction('Isinteger', self._builtin_isinteger, 1),
+            'Istruthvalue': BuiltinFunction('Istruthvalue', self._builtin_istruthvalue, 1),
+            'Isstring': BuiltinFunction('Isstring', self._builtin_isstring, 1),
+            'Istuple': BuiltinFunction('Istuple', self._builtin_istuple, 1),
+            'Isfunction': BuiltinFunction('Isfunction', self._builtin_isfunction, 1),
+            'Isdummy': BuiltinFunction('Isdummy', self._builtin_isdummy, 1),
+            'Stem': BuiltinFunction('Stem', self._builtin_stem, 1),
+            'Stern': BuiltinFunction('Stern', self._builtin_stern, 1),
+            'Conc': BuiltinFunction('Conc', self._builtin_conc, 2),
+            'ItoS': BuiltinFunction('ItoS', self._builtin_itos, 1),
+            'Order': BuiltinFunction('Order', self._builtin_order, 1),
+            'Null': BuiltinFunction('Null', self._builtin_null, 1)
         }
         
         for name, func in builtins.items():
-            self.current_env.bind(name, func)
+            self.env_stack[-1].bind(name, func)
     
     def _builtin_print(self, value):
         """Built-in Print function."""
         if value is None:
             print("nil")
+        elif isinstance(value, Tuple):
+            print(f"({', '.join(str(v) for v in value.values)})")
         else:
             print(value)
         return value  # Print returns the value it prints
@@ -142,24 +145,111 @@ class CSEMachine:
         current_cs = []
         current = st
         
-        self.generate_control_structure(current, 0, current_cs)
+        self.generate_control_structure(current, current_cs)
         self.control_structures[0] = ControlStructure(0, current_cs)
 
-    def generate_control_structure(self, node, cs_id, cs):
+    def generate_control_structure(self, node, cs):
         
         if node is None:
             return
         
         if node.value == 'lambda':
-            cs.append(Closure(cs_id + 1, [node.left.value], 'lambda', None))
-            new_cs = []
-            self.generate_control_structure(node.left.right, cs_id + 1, new_cs)
-            self.control_structures[cs_id + 1] = ControlStructure(cs_id + 1, new_cs)
-            
-            if node.right and node.right.value != 'lambda':
-                self.generate_control_structure(node.right, cs_id, cs)
+
+            if node.left.value == ',':
+                # Lambda with multiple parameters
+                params = []
+                current = node.left.left
+                while current:
+                    params.append(current.value)
+                    current = current.right
+                print("params: ", params)
+                cs.append(Closure(self.last_cs_id, params, 'lambda', None))
             else:
-                self.generate_control_structure(node.right, cs_id + 1, cs)
+                cs.append(Closure(self.last_cs_id, [node.left.value], 'lambda', None))
+            
+            lambda_cs_id = self.last_cs_id
+            self.last_cs_id += 1
+            new_cs = []
+            self.generate_control_structure(node.left.right, new_cs)
+            self.control_structures[lambda_cs_id] = ControlStructure(lambda_cs_id, new_cs)
+            
+            self.generate_control_structure(node.right, cs)
+        
+        elif node.value == '->':
+            # B -> E1 | E2  becomes delta_true, delta_false, beta, B
+            condition = node.left
+            true_branch = node.left.right
+            false_branch = node.left.right.right
+
+            def handle_lambda(c_node, c_cs):
+                if c_node.left.value == ',':
+                    # Lambda with multiple parameters
+                    params = []
+                    current = c_node.left.left
+                    while current:
+                        params.append(current.value)
+                        current = current.right
+                    c_cs.append(Closure(self.last_cs_id, params, 'lambda', None))
+                else:
+                    c_cs.append(Closure(self.last_cs_id, [c_node.left.value], 'lambda', None))
+                
+                lambda_cs_id = self.last_cs_id
+                self.last_cs_id += 1
+                new_cs = []
+                self.generate_control_structure(c_node.left.right, new_cs)
+                self.control_structures[lambda_cs_id] = ControlStructure(lambda_cs_id, new_cs)
+
+            def handle_tau(c_node):
+                num_children = 0
+                child = c_node.left
+                while child:
+                    num_children += 1
+                    child = child.right
+                return f"tau_{num_children}"
+
+            # B
+            condition_cs = []
+            if condition.value == 'lambda':
+                handle_lambda(condition, condition_cs)
+            elif condition.value == 'tau':
+                condition_cs.append(handle_tau(condition))
+                self.generate_control_structure(condition.left, condition_cs)
+            else:
+                condition_cs.append(condition.value)
+                self.generate_control_structure(condition.left, condition_cs)
+            
+            # delta_true
+            true_cs = []
+            if true_branch.value == 'lambda':
+                handle_lambda(true_branch, true_cs)
+            elif true_branch.value == 'tau':
+                true_cs.append(handle_tau(true_branch))
+                self.generate_control_structure(true_branch.left, true_cs)
+            else:
+                true_cs.append(true_branch.value)
+                self.generate_control_structure(true_branch.left, true_cs)
+
+            # delta_false
+            false_cs = []
+            if false_branch.value == 'lambda':
+                handle_lambda(false_branch, false_cs)
+            elif false_branch.value == 'tau':
+                false_cs.append(handle_tau(false_branch))
+                self.generate_control_structure(false_branch.left, false_cs)
+            else:
+                self.generate_control_structure(false_branch.left, false_cs)
+
+            self.control_structures[self.last_cs_id] = ControlStructure(self.last_cs_id, true_cs)
+            cs.append(f"delta_{self.last_cs_id}_t")
+            self.last_cs_id += 1
+            self.control_structures[self.last_cs_id] = ControlStructure(self.last_cs_id, false_cs)
+            cs.append(f"delta_{self.last_cs_id}_f")
+            self.last_cs_id += 1
+
+            cs.append('beta')
+            cs += condition_cs
+            
+            self.generate_control_structure(node.right, cs)
         
         else:
             if node.value == 'tau':
@@ -171,8 +261,8 @@ class CSEMachine:
                 cs.append(f"tau_{num_children}")
             else:
                 cs.append(node.value)
-            self.generate_control_structure(node.left, cs_id, cs)
-            self.generate_control_structure(node.right, cs_id, cs)
+            self.generate_control_structure(node.left, cs)
+            self.generate_control_structure(node.right, cs)
 
     
     # Evaluating expressions ##########
@@ -196,6 +286,10 @@ class CSEMachine:
                 f.write(', '.join(str(item) for item in self.control_stack) + '\n\n')
             with open('src/cse_machine/csem_output/stack.txt', 'a') as f:
                 f.write(', '.join(str(item) for item in self.value_stack) + '\n\n')
+            
+            # print(self.control_structures)
+            # self.env_stack[-1].print_parent_stack()
+            # print("Env Stack: ", self.env_stack)
         
         if len(self.value_stack) != 1:
             raise ValueError("Evaluation did not result in a single value on the value stack.")
@@ -219,7 +313,7 @@ class CSEMachine:
         # Rule 1 - Stack a name
         if control_stack_top and isinstance(control_stack_top, str) and control_stack_top.startswith('<ID:'):
             name = control_stack_top[4:-1]
-            value = self.current_env.lookup(name)
+            value = self.env_stack[-1].lookup(name)
             self.value_stack.append(value)
             self.control_stack.pop()
 
@@ -232,17 +326,42 @@ class CSEMachine:
             str_value = control_stack_top[5:-1]
             self.value_stack.append(str_value)
             self.control_stack.pop()
+        
+        elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'true':
+            self.value_stack.append(True)
+            self.control_stack.pop()
+        
+        elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'false':
+            self.value_stack.append(False)
+            self.control_stack.pop()
 
         # Rule 2 - Stack lambda
         elif control_stack_top and isinstance(control_stack_top, Closure):
-            control_stack_top.env = self.current_env
+            control_stack_top.env = self.env_stack[-1]
             self.value_stack.append(control_stack_top)
             self.control_stack.pop()
 
         # Rule 3 - Apply (Ope)Rator
-        elif control_stack_top and isinstance(control_stack_top, BuiltinFunction):
-            # Implement later
-            pass
+        elif (control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'gamma' 
+            and value_stack_top and isinstance(value_stack_top, BuiltinFunction)):
+            
+            self.control_stack.pop()  # Pop 'gamma'
+            builtin_function = value_stack_top
+            self.value_stack.pop()  # Pop the BuiltinFunction from the value stack
+            args = []
+
+            if builtin_function.arity == -1:
+                # Variable arity function, pop all arguments until we hit a non-argument
+                while self.value_stack and isinstance(self.value_stack[-1], (int, str, bool, Tuple, Closure)):
+                    args.append(self.value_stack.pop())
+            else:
+                for _ in range(builtin_function.arity):
+                    if not self.value_stack:
+                        raise ValueError(f"(Rule 3) Not enough arguments for function '{builtin_function.name}'. Expected {builtin_function.arity}, found {len(args)}.")
+                    args.append(self.value_stack.pop())
+
+            result = builtin_function.func(*args)
+            self.value_stack.append(result)
 
         # Rule 4 (and 11) - Apply lambda
         elif (control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'gamma' 
@@ -253,30 +372,51 @@ class CSEMachine:
             
             # Preparing new environment
             next_env_id = self.last_env_id + 1
-            new_env = Environment(next_env_id, self.current_env)
+            self.last_env_id += 1
+            new_env = Environment(next_env_id, closure.env)
             
             params = closure.params
-            for i in range(len(params)):
-                if i < len(self.value_stack):
-                    # Param is in the format of <ID:x>
-                    param = params[i][4:-1]  # Extract the variable name from <ID:x>
-                    print(f"Binding parameter '{param}' to value '{self.value_stack[-1]}' in new environment.")
-                    new_env.bind(param, self.value_stack[-1])
-                    self.value_stack.pop()
 
-            self.current_env = new_env
+            if isinstance(self.value_stack[-1], Tuple):
+                # If the last value on the stack is a tuple, unpack it
+                t = self.value_stack.pop()
+                tuple_values = t.values
+
+                if len(params) == 1:
+                    # If there's only one parameter, bind the entire tuple
+                    param = params[0][4:-1]
+                    new_env.bind(param, t)
+
+                elif len(tuple_values) != len(params):
+                    raise ValueError(f"(Rule 4) Tuple length {len(tuple_values)} does not match number of parameters {len(params)}.")
+                
+                else:
+                    for i in range(len(tuple_values)):
+                        param = params[i][4:-1]  # Extract the variable name from <ID:x>
+                        new_env.bind(param, tuple_values[i])
+
+            else:
+                for i in range(len(params)):
+                    if i < len(self.value_stack):
+                        # Param is in the format of <ID:x>
+                        param = params[i][4:-1]  # Extract the variable name from <ID:x>
+                        new_env.bind(param, self.value_stack[-1])
+                        self.value_stack.pop()
+
+            self.env_stack.append(new_env)
 
             # Preparin control stack
             self.control_stack.pop() # Pop the 'gamma'
-            self.control_stack.append(self.current_env)
+            self.control_stack.append(self.env_stack[-1])
             self.control_stack += self.control_structures[closure.cs_id].body
 
-            self.value_stack.append(self.current_env)
+            self.value_stack.append(self.env_stack[-1])
 
         # Rule 5 - Exit environment
         elif control_stack_top and isinstance(control_stack_top, Environment):
-            self.current_env = control_stack_top.parent
+            # self.current_env = control_stack_top.parent
             self.control_stack.pop()
+            self.env_stack.pop()
             
             if isinstance(self.value_stack[-2], Environment):
                 self.value_stack.pop(-2)
@@ -370,7 +510,24 @@ class CSEMachine:
             self.value_stack.append(result)
 
         # Rule 8 - Conditionals
-        # Will implement later
+        elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'beta':
+            self.control_stack.pop() # Pop 'beta'
+            value = self.value_stack.pop()
+
+            if value is None:
+                raise ValueError(f"(Rule 8) Expected a boolean value for conditional evaluation, got {value}.")
+            elif value == True or value == 'true':
+                self.control_stack.pop() # Pop the id of false constrol structure
+                true_cs_id = self.control_stack.pop() # Pop the id of true control structure
+                true_cs_id = int(true_cs_id[6:-2]) # Extract the id from 'delta_<id>_t'
+                self.control_stack += self.control_structures[true_cs_id].body
+            elif value == False or value == 'false':
+                false_cs_id = self.control_stack.pop() # Pop the id of false control structure
+                false_cs_id = int(false_cs_id[6:-2]) # Extract the id from 'delta_<id>_f'
+                self.control_stack.pop() # Pop the id of true constrol structure
+                self.control_stack += self.control_structures[false_cs_id].body
+            else:
+                raise ValueError(f"(Rule 8) Unexpected error occured while evaluatind conditional.")
 
         # Rule 9 - Tuple formation
         elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top.startswith('tau_'):
@@ -390,7 +547,7 @@ class CSEMachine:
             
             self.control_stack.pop()
             tuple = self.value_stack.pop()
-            index = self.value_stack.pop()
+            index = self.value_stack.pop() - 1 # Convert to 0-based index
 
             if index < 0 or index >= len(tuple.values):
                 raise IndexError(f"(Rule 10) Tuple index out of range: {index} for tuple of length {len(tuple.values)}.")

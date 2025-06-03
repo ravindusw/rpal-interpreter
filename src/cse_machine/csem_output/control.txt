@@ -1,16 +1,28 @@
-e_0, gamma, <None lambda 1 ['<ID:X>']>
+e_0, gamma, <None lambda 1 ['<ID:Add>']>
 
 e_0, gamma
 
-e_0, e_1, tau_2, <ID:X>, **, <ID:X>, <INT:2>
+e_0, e_1, gamma, <ID:Print>, gamma, <ID:Add>, tau_2, <INT:3>, <INT:4>
 
-e_0, e_1, tau_2, <ID:X>, **, <ID:X>
+e_0, e_1, gamma, <ID:Print>, gamma, <ID:Add>, tau_2, <INT:3>
 
-e_0, e_1, tau_2, <ID:X>, **
+e_0, e_1, gamma, <ID:Print>, gamma, <ID:Add>, tau_2
 
-e_0, e_1, tau_2, <ID:X>
+e_0, e_1, gamma, <ID:Print>, gamma, <ID:Add>
 
-e_0, e_1, tau_2
+e_0, e_1, gamma, <ID:Print>, gamma
+
+e_0, e_1, gamma, <ID:Print>, e_2, +, <ID:x>, <ID:y>
+
+e_0, e_1, gamma, <ID:Print>, e_2, +, <ID:x>
+
+e_0, e_1, gamma, <ID:Print>, e_2, +
+
+e_0, e_1, gamma, <ID:Print>, e_2
+
+e_0, e_1, gamma, <ID:Print>
+
+e_0, e_1, gamma
 
 e_0, e_1
 
