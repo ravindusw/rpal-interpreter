@@ -8,7 +8,7 @@ class Node:
         """
         Initialize a new node.
 
-        Attributes:
+        Args:
             value (str): The value of the node.
             right (Node): The right child
             left (Node): The left child

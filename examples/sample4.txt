@@ -1,0 +1,1 @@
+let Inc x = x + 1 in Print (Inc x)
