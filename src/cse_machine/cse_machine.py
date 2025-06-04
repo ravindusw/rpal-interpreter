@@ -1,6 +1,6 @@
 from .utils import Environment, Tuple, Closure, BuiltinFunction, ControlStructure
 from src.parser.utils import Node
-import sys
+import os
 
 class CSEMachine:
     """
@@ -236,13 +236,18 @@ class CSEMachine:
 
     def evaluate(self):
         """
+        Main entry point of the CSE machine.
         Evaluate the RPAL program using the CSE machine.
         This method will repeatedly apply rules until no more rules can be applied.
         """
+        # Create a folder to store outputs if not exists
+        output_dir = 'src/cse_machine/csem_output'
+        os.makedirs(output_dir, exist_ok=True)
+
         # Clear the output files before starting evaluation
-        with open('src/cse_machine/csem_output/control.txt', 'w') as f:
+        with open('src/cse_machine/csem_output/control_stack.txt', 'w') as f:
             f.write('')
-        with open('src/cse_machine/csem_output/stack.txt', 'w') as f:
+        with open('src/cse_machine/csem_output/value_stack.txt', 'w') as f:
             f.write('')
 
         if self.control_stack is None or len(self.control_stack) == 0:
@@ -253,9 +258,9 @@ class CSEMachine:
             self.apply_rule()
             
             # Write current content to files
-            with open('src/cse_machine/csem_output/control.txt', 'a') as f:
+            with open('src/cse_machine/csem_output/control_stack.txt', 'a') as f:
                 f.write(', '.join(str(item) for item in self.control_stack) + '\n\n')
-            with open('src/cse_machine/csem_output/stack.txt', 'a') as f:
+            with open('src/cse_machine/csem_output/value_stack.txt', 'a') as f:
                 f.write(', '.join(str(item) for item in self.value_stack) + '\n\n')
             
             # print(self.control_structures)
@@ -575,4 +580,3 @@ class CSEMachine:
         else:
             raise ValueError(f"Control stack has {control_stack_top}. No CSE Rule to handle this.")
             
-
