@@ -207,49 +207,28 @@ class LexicalAnalyzer:
             identifier += self.scanner.advance()
         return identifier
         
-    def get_tokens(self):
+    def tokenize(self):
         """
+        Main entry point of the lexical analyzer.
         Scan all tokens from the source code until EOF is reached.
         
         Returns:
             list: A list of tokens.
         """
         while not self.scanner.is_at_end():
-            print("Scanned so far: %s", [str(x.lexeme) for x in self.tokens])
             self.scan_token()
         
         # Add EOF token at the end
         line, column = self.scanner.current_position()
         self.tokens.append(Token(TokenType.EOF, "EOF", line, column))
 
+        # print(f"Tokens scanned: [{", ".join([str(token.lexeme) for token in self.tokens])}]")  
         return self.tokens
     
 
 
 def main():
-    # Example usage
-    source_code = ""
-    
-    try:
-        # Use a relative path or full path
-        with open("./examples/sample.txt", "r") as file:
-            print("Reading source code from 'examples/sample.txt'...")
-            source_code = file.read().strip()
-    except FileNotFoundError:
-        # Fallback to a simple example if file not found
-        print("File not found. Using example source code instead.")
-        source_code = "let x = 5 in x + 3"
-    
-    print("Source Code:")
-    print(source_code)
-
-    analyzer = LexicalAnalyzer(source_code)
-    tokens = analyzer.get_tokens()
-    
-    print("\nTokens:")
-    for token in tokens:
-        print(token.token_type, end=' ')
-
+    pass
 
 if __name__ == "__main__":
     main()

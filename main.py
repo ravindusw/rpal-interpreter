@@ -4,34 +4,51 @@ from src.standardizer.standardizer import Standardizer
 from src.cse_machine.cse_machine import CSEMachine
 
 def main():
+    
+    # Source Code Reading
     with open("./examples/sample22.txt", "r") as file:
-        print("Reading source code from 'examples/sample.txt'...")
+        print("--------------------------------------------------")
+        print("\nReading source code from 'examples/sample.txt'...")
         source_code = file.read().strip()
     print("Source code read successfully.")
-    print("Source Code:")
-    print(source_code)
+    # print("Source Code:-")   
+    # print(source_code)
 
+    # Lexical Analysis
+    print("--------------------------------------------------")
+    print("\nStarting Lexical Analysis...")
     analyzer = LexicalAnalyzer(source_code)
-    tokens = analyzer.get_tokens()
-    print("Tokens:")
-    for token in tokens:
-        print(token)
+    tokens = analyzer.tokenize()
+    print("Lexical Analysis completed successfully.")
     
+    # Parsing
+    print("--------------------------------------------------")
+    print("\nStarting Parsing...")
     parser = Parser(tokens)
-    parser.parse()
-
+    ast = parser.parse()
+    # parser.print_abstract_syntax_tree()
     print("Parsing completed successfully.")
 
-    standardizer = Standardizer(parser.token_stack.peek())
-    standardizer.standardize()
-    standardizer.print_standardized_tree()
+    # Standardizing
+    print("--------------------------------------------------")
+    print("\nStarting Standardization...")
+    standardizer = Standardizer(ast)
+    st = standardizer.standardize()
+    # standardizer.print_standardized_tree()
 
     print("Standardization completed successfully.")
 
-    cse_machine = CSEMachine(standardizer.standardized_tree)
+    # Evaluation
+    print("--------------------------------------------------")
+    print("\nStarting CSE Machine...")
+    cse_machine = CSEMachine(st)
     result = cse_machine.evaluate()
-    print("CSE Machine evaluation result:")
-    print(result)
+    print("CSE Machine evaluation completed successfully.")
+
+    print("--------------------------------------------------")
+
+    print("\nFinal output Of RPAL program:", result)
+    print()
 
 if __name__ == "__main__":
     main()

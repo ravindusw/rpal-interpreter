@@ -33,7 +33,7 @@ class Parser:
         """
         Consume the current token and update the current_token_index
         """
-        print(self.get_current_token())
+        # print(self.get_current_token())
         self.current_token_index += 1
 
     def build_tree(self, value, num_children):
@@ -52,6 +52,15 @@ class Parser:
             p = child
         self.token_stack.push(Node(value, p, None))
 
+    def print_abstract_syntax_tree(self):
+        """
+        Print the Abstract Syntax Tree.
+        """
+        if self.token_stack.peek() is not None:
+            self.preorder_traversal(self.token_stack.peek())
+        else:
+            print("AST tree is empty")
+    
     def preorder_traversal(self, node, dots=""):
         """
         Perform a preorder traversal of the abstract syntax tree and print the nodes.
@@ -67,13 +76,15 @@ class Parser:
 
     def parse(self):
         """
+        Main entry point of the parser.
         Parse the token stream and build a derivation tree.
         """
         if self.get_current_token() and self.get_current_token().token_type == TokenType.EOF:
             print("Input is empty. Nothing to parse.")
             return
         self.E()
-        self.preorder_traversal(self.token_stack.peek())
+        
+        return self.token_stack.peek()  # Return the root of the abstract syntax tree
 
     
     # Expressions #####################
@@ -101,7 +112,7 @@ class Parser:
             else:
                 raise SyntaxError("Expected 'in' but reached end of input.")
             self.E()
-            print("E -> let D in E")
+            # print("E -> let D in E")
             self.build_tree("let", 2)
 
         elif token.token_type == TokenType.FN:
@@ -120,12 +131,12 @@ class Parser:
             else:
                 raise SyntaxError(f"Expected '.' after function parameters but got {token.token_type} at line {token.line} column {token.column}.")
             self.E()
-            print("E -> fn Vb+ . E")
+            # print("E -> fn Vb+ . E")
             self.build_tree("lambda", n+1)
 
         else:
             self.Ew()
-            print("E -> Ew")
+            # print("E -> Ew")
 
     # ---------------------------------
     # Ew -> T where Dr      => where
@@ -138,7 +149,7 @@ class Parser:
         if token and token.token_type == TokenType.WHERE:
             self.consume_token()
             self.Dr()
-            print("Ew -> T where Dr")
+            # print("Ew -> T where Dr")
             self.build_tree("where", 2)
 
     
@@ -158,11 +169,11 @@ class Parser:
             self.Ta()
             n += 1
             token = self.get_current_token()
-            print("T -> Ta ( , Ta )+")
+            # print("T -> Ta ( , Ta )+")
         if n > 1:
             self.build_tree("tau", n)
-        else:
-            print("T -> Ta")
+        # else:
+            # print("T -> Ta")
 
     # ---------------------------------
     # Ta -> Ta aug Tc           => aug
@@ -178,7 +189,7 @@ class Parser:
         while token and token.token_type == TokenType.AUG:
             self.consume_token()
             self.Tc()
-            print("Ta -> Ta aug Tc")
+            # print("Ta -> Ta aug Tc")
             self.build_tree("aug", 2)
             token = self.get_current_token()
 
@@ -201,7 +212,7 @@ class Parser:
             else:
                 raise SyntaxError(f"Expected '|' after '->' but got {token.token_type} at line {token.line} column {token.column}.")
             self.Tc()
-            print("Tc -> B -> Tc | Tc")
+            # print("Tc -> B -> Tc | Tc")
             self.build_tree("->", 3)
 
     
@@ -221,7 +232,7 @@ class Parser:
         while token and token.token_type == TokenType.OR:
             self.consume_token()
             self.Bt()
-            print("B -> B or Bt")
+            # print("B -> B or Bt")
             self.build_tree("or", 2)
             token = self.get_current_token()
 
@@ -239,7 +250,7 @@ class Parser:
         while token and token.token_type == TokenType.AMPERSAND:
             self.consume_token()
             self.Bs()
-            print("Bt -> Bs & Bs")
+            # print("Bt -> Bs & Bs")
             token = self.get_current_token()
             self.build_tree("&", 2)
 
@@ -253,11 +264,11 @@ class Parser:
         if token and token.token_type == TokenType.NOT:
             self.consume_token()
             self.Bp()
-            print("Bs -> not Bp")
+            # ("Bs -> not Bp")
             self.build_tree("not", 1)
         else:
             self.Bp()
-            print("Bs -> Bp")
+            # print("Bs -> Bp")
 
     # ---------------------------------
     # Bp -> A op A              => op
@@ -274,7 +285,7 @@ class Parser:
                                      TokenType.EQUAL, TokenType.NOT_EQUAL]:
             self.consume_token()
             self.A()
-            print(f"Bp -> A {token.lexeme} A")
+            # print(f"Bp -> A {token.lexeme} A")
             self.build_tree(token.token_type, 2)
 
     
@@ -298,11 +309,11 @@ class Parser:
         if token.token_type == TokenType.PLUS:
             self.consume_token()
             self.At()
-            print("A -> + At")
+            # print("A -> + At")
         elif token.token_type == TokenType.MINUS:
             self.consume_token()
             self.At()
-            print("A -> - At")
+            # print("A -> - At")
             self.build_tree("neg", 1)       
         else:
             self.At()
@@ -311,7 +322,7 @@ class Parser:
         while token and token.token_type in [TokenType.PLUS, TokenType.MINUS]:
             self.consume_token()
             self.At()
-            print(f"A -> A {token.lexeme} At")
+            # print(f"A -> A {token.lexeme} At")
             if token.token_type == TokenType.PLUS:
                 self.build_tree("+", 2)
             else:
@@ -333,7 +344,7 @@ class Parser:
         while token and token.token_type in [TokenType.MULTIPLY, TokenType.DIVIDE]:
             self.consume_token()
             self.Af()
-            print(f"At -> At {token.lexeme} Af")
+            # print(f"At -> At {token.lexeme} Af")
             self.build_tree(token.token_type, 2)
             token = self.get_current_token()
 
@@ -348,10 +359,10 @@ class Parser:
         if token.token_type == TokenType.POWER:
             self.consume_token()
             self.Af()
-            print("Af -> Ap ** Af")
+            # print("Af -> Ap ** Af")
             self.build_tree("**", 2)
-        else:
-            print("Af -> Ap")
+        # else:
+            # print("Af -> Ap")
 
     # ---------------------------------
     # Ap -> Ap @ IDENTIFIER R       => @
@@ -375,7 +386,7 @@ class Parser:
             self.token_stack.push(Node(f"<ID:{token.lexeme}>", None, None))  # Push IDENTIFIER node
             self.R()
             self.build_tree("@", 3)
-            print("Ap -> Ap @ IDENTIFIER R")
+            # print("Ap -> Ap @ IDENTIFIER R")
             token = self.get_current_token()
 
     # (Ope)Rators and (Ope)Rands ######
@@ -396,7 +407,7 @@ class Parser:
                                               TokenType.TRUE, TokenType.FALSE, TokenType.NIL,
                                               TokenType.DUMMY]:
             self.Rn()
-            print("R -> R Rn")
+            # print("R -> R Rn")
             self.build_tree("gamma", 2)
             token = self.get_current_token()
 
@@ -424,7 +435,7 @@ class Parser:
             token = self.get_current_token()
             if token and token.token_type == TokenType.RIGHT_PAREN:
                 self.consume_token()
-                print("Rn -> ( E )")
+                # ("Rn -> ( E )")
             elif token is None:
                 raise SyntaxError("Expected ')' after expression but reached end of input.")
             else:
@@ -432,22 +443,22 @@ class Parser:
         elif token.token_type == TokenType.IDENTIFIER:
             # Rn -> IDENTIFIER
             self.consume_token()
-            print("Rn -> IDENTIFIER")
+            # print("Rn -> IDENTIFIER")
             self.token_stack.push(Node(f"<ID:{token.lexeme}>", None, None))  # Push IDENTIFIER node
         elif token.token_type == TokenType.INTEGER:
             # Rn -> INTEGER
             self.consume_token()
-            print("Rn -> INTEGER")
+            # print("Rn -> INTEGER")
             self.token_stack.push(Node(f"<INT:{token.lexeme}>", None, None))  # Push INTEGER node
         elif token.token_type == TokenType.STRING:
             # Rn -> STRING
             self.consume_token()
-            print("Rn -> STRING")
+            # print("Rn -> STRING")
             self.token_stack.push(Node(f"<STR:{token.lexeme}>", None, None))  # Push STRING node
         elif token.token_type == TokenType.TRUE:
             # Rn -> true
             self.consume_token()
-            print("Rn -> true")
+            # print("Rn -> true")
             self.build_tree("true", 0)
         elif token.token_type == TokenType.FALSE:
             # Rn -> false
@@ -457,12 +468,12 @@ class Parser:
         elif token.token_type == TokenType.NIL:
             # Rn -> nil
             self.consume_token()
-            print("Rn -> nil")
+            # print("Rn -> nil")
             self.build_tree("nil", 0)
         elif token.token_type == TokenType.DUMMY:
             # Rn -> dummy
             self.consume_token()
-            print("Rn -> dummy")
+            # print("Rn -> dummy")
             self.build_tree("dummy", 0)
         else:
             raise SyntaxError(f"Unexpected token: {token} at line {token.line} column {token.column}.")
@@ -481,7 +492,7 @@ class Parser:
         if token and token.token_type == TokenType.WITHIN:
             self.consume_token()
             self.D()
-            print("D -> Da within D")
+            # print("D -> Da within D")
             self.build_tree("within", 2)
 
     # ---------------------------------
@@ -497,7 +508,7 @@ class Parser:
             self.consume_token()
             self.Dr()
             n += 1
-            print("Da -> Dr ( and Dr )+")
+            # print("Da -> Dr ( and Dr )+")
             token = self.get_current_token()
         if n > 1:
             self.build_tree("and", n)
@@ -513,11 +524,11 @@ class Parser:
         if token and token.token_type == TokenType.REC:
             self.consume_token()
             self.Db()
-            print("Dr -> rec Db")
+            # print("Dr -> rec Db")
             self.build_tree("rec", 1)
         else:
             self.Db()
-            print("Dr -> Db")
+            # print("Dr -> Db")
 
     # ---------------------------------
     # Db -> IDENTIFIER Vb+ = E  => function_form
@@ -552,7 +563,7 @@ class Parser:
                 elif token.token_type == TokenType.EQUALS:
                     self.consume_token()
                     self.E()
-                    print("Db -> IDENTIFIER Vb+ = E")
+                    # print("Db -> IDENTIFIER Vb+ = E")
                     self.build_tree("function_form", n + 1)
                 else:
                     raise SyntaxError(f"Expected '=' after variable but got '{token.token_type}' at line {token.line} column {token.column}.")
@@ -568,7 +579,7 @@ class Parser:
                     raise SyntaxError("Expected '=' after variable but reached end of input.")
                 self.consume_token()
                 self.E()
-                print("Db -> Vl = E")
+                # print("Db -> Vl = E")
                 self.build_tree("=", 2)
         
         elif token.token_type == TokenType.LEFT_PAREN:
@@ -581,7 +592,7 @@ class Parser:
             elif token is None:
                 raise SyntaxError("Expected ')' but reached end of input.")
             self.consume_token()
-            print("Db -> ( D )")
+            # print("Db -> ( D )")
                
  
     # Variables #######################
@@ -601,7 +612,7 @@ class Parser:
         if token.token_type == TokenType.IDENTIFIER:
             # Vb -> IDENTIFIER
             self.consume_token()
-            print("Vb -> IDENTIFIER")
+            # print("Vb -> IDENTIFIER")
             self.token_stack.push(Node(f"<ID:{token.lexeme}>", None, None))  # Push IDENTIFIER node
         elif token.token_type == TokenType.LEFT_PAREN:
             # Vb -> ( Vl ) | ()
@@ -609,7 +620,7 @@ class Parser:
             token = self.get_current_token()
             if token and token.token_type == TokenType.RIGHT_PAREN:
                 self.consume_token()
-                print("Vb -> ( )")
+                # print("Vb -> ( )")
                 self.build_tree("()", 0)
             elif token is None:
                 raise SyntaxError("Expected ')' after '(' but reached end of input.")
@@ -621,7 +632,7 @@ class Parser:
                 elif token is None:
                     raise SyntaxError("Expected ')' after variable list but reached end of input.")
                 self.consume_token()
-                print("Vb -> ( Vl )")
+                # print("Vb -> ( Vl )")
 
     # ---------------------------------
     # Vl -> IDENTIFIER ( , IDENTIFIER )*  => ,
@@ -637,7 +648,7 @@ class Parser:
             self.consume_token()
             n = 1
             self.token_stack.push(Node(f"<ID:{token.lexeme}>", None, None))
-            print("Vl -> IDENTIFIER")
+            # print("Vl -> IDENTIFIER")
             token = self.get_current_token()
             while token and token.token_type == TokenType.COMMA:
                 self.consume_token()
@@ -652,45 +663,14 @@ class Parser:
                 token = self.get_current_token()
             if n > 1:
                 self.build_tree(",", n)
-                print("Vl -> IDENTIFIER ( , IDENTIFIER )*")
+                # print("Vl -> IDENTIFIER ( , IDENTIFIER )*")
         else:
             raise SyntaxError(f"Unexpected token: {token}")
     
 
+
 def main():
-    # Example usage of the Parser
-    tokens = [
-        Token(TokenType.LET, "let", 1, 1),
-        Token(TokenType.IDENTIFIER, "x", 1, 5),
-        Token(TokenType.EQUALS, "=", 1, 6),
-        Token(TokenType.INTEGER, "42", 1, 7),
-        Token(TokenType.IN, "in", 1, 7),
-        Token(TokenType.IDENTIFIER, "x", 1, 10),
-        Token(TokenType.PLUS, "+", 1, 11),
-        Token(TokenType.INTEGER, "1", 1, 12),
-        Token(TokenType.EOF, "", 1, 11)
-    ]
-    
-    parser = Parser(tokens)
-    parser.parse()
+    pass
 
 if __name__ == "__main__":
     main()
-        
-
-        
-
-
-        
-
-            
-
-        
-
-
-
-
-
-
-    
-

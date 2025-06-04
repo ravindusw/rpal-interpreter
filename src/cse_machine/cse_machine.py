@@ -579,4 +579,11 @@ class CSEMachine:
 
         else:
             raise ValueError(f"Control stack has {control_stack_top}. No CSE Rule to handle this.")
-            
+        
+
+
+def main():
+    pass
+
+if __name__ == "__main__":
+    main()

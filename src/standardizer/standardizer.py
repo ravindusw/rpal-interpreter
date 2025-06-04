@@ -19,6 +19,7 @@ class Standardizer:
     def standardize(self):
         """
         Main entry point for standardization.
+        Standardizes the AST by traversing it and applying standardization rules.
         
         Returns:
             Node: The standardized AST.
@@ -31,7 +32,7 @@ class Standardizer:
             print("Standardization failed: The AST is empty or invalid.")
             return None
         else:
-            print("Standardization completed successfully.")
+            #cprint("Standardization completed successfully.")
             return self.standardized_tree
     
     def standardize_bottom_up(self, node):
