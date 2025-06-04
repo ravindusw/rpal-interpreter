@@ -352,6 +352,12 @@ class CSEMachine:
                 # Variable arity function, pop all arguments until we hit a non-argument
                 while self.value_stack and isinstance(self.value_stack[-1], (int, str, bool, Tuple, Closure)):
                     args.append(self.value_stack.pop())
+            elif isinstance(self.value_stack[-1], Tuple):
+                tuple = self.value_stack.pop().values
+                for _ in range(builtin_function.arity):
+                    if not tuple[_]:
+                        raise ValueError(f"(Rule 3) Not enough arguments for function '{builtin_function.name}'. Expected {builtin_function.arity}, found {len(args)}.")
+                    args.append(tuple[_])
             else:
                 for _ in range(builtin_function.arity):
                     if not self.value_stack:
