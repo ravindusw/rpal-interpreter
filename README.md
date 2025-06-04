@@ -49,10 +49,12 @@ cd rpal-interpreter
 2. Verify the project structure:
 ```
 rpal-interpreter/
-├── myrpal.py                    # Main interpreter entry point
+├── myrpal.py                   # Main interpreter entry point
 ├── src/
 │   ├── lexical_analyzer/
-│   │   └── lexical_analyzer.py  # Tokenization module
+│   │   └── lexical_analyzer.py # Tokenization module
+│   │   └── scanner.py          # Character-level scanner
+│   │   └── token.py            # Token definitions
 │   ├── parser/
 │   │   ├── parser.py           # AST generation
 │   │   └── utils.py            # AST node definitions
