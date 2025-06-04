@@ -121,7 +121,8 @@ class Tuple:
         self.values = values
 
     def __str__(self):
-        return f"tau_{self.__len__()}"
+        return f"({', '.join(map(str, self.values))})"
+        # return "tau_{self.__len__()}"
     
     def __repr__(self):
         return self.__str__()

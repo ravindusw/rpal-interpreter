@@ -4,7 +4,7 @@ from src.standardizer.standardizer import Standardizer
 from src.cse_machine.cse_machine import CSEMachine
 
 def main():
-    with open("./examples/sample13.txt", "r") as file:
+    with open("./examples/sample25.txt", "r") as file:
         print("Reading source code from 'examples/sample.txt'...")
         source_code = file.read().strip()
     print("Source code read successfully.")

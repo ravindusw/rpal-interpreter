@@ -69,6 +69,9 @@ class Parser:
         """
         Parse the token stream and build a derivation tree.
         """
+        if self.get_current_token() and self.get_current_token().token_type == TokenType.EOF:
+            print("Input is empty. Nothing to parse.")
+            return
         self.E()
         self.preorder_traversal(self.token_stack.peek())
 

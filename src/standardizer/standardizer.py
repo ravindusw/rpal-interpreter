@@ -472,17 +472,27 @@ class Standardizer:
             return node
         
         x_node = node.left.left
+        # print("x_node:", x_node.value)
         e_node = node.left.left.right
+        # print("e_node:", e_node.value)
 
         x_node.right = e_node
         lambda_node = Node('lambda', x_node, None)
-        y_node = Node('Y', None, lambda_node)
+        y_node = Node('Y_star', None, lambda_node) # Y_star instead of Y
         gamma_node = Node('gamma', y_node, None)
 
-        x_node_copy = Node(x_node.value, None, None)
-        x_node_copy.right = gamma_node
+        x_node_copy = Node(x_node.value, None, gamma_node)
         
         eq_node = Node('=', x_node_copy, node.right)
+
+        # Print the tree
+        # def preorder(node):
+        #     if node is not None:
+        #         print(node.value, end=' ')
+        #         preorder(node.left)
+        #         preorder(node.right)
+        # preorder(eq_node)
+
         return eq_node
         
 

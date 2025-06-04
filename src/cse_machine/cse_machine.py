@@ -21,6 +21,15 @@ class CSEMachine:
         self.initiate(st) # Set up the initial environment and built-in functions
 
     def initiate(self, st):
+        """
+        Set up the initial environment and built-in functions.
+
+        Args:
+            st (Node): The root node of the standardized tree.
+        """
+        if st is None:
+            return
+        
         self.setup_builtin_functions()
         self.setup_control_structures(st)
         self.control_stack.append(self.env_stack[-1])  # Start with the initial environment on the control stack
@@ -94,10 +103,12 @@ class CSEMachine:
     
     def _builtin_stern(self, value):
         """Built-in Stern function (rest of string)."""
-        if isinstance(value, str) and len(value) > 1:
-            return value[1:]
-        else:
-            return None
+        if isinstance(value, str) and len(value) > 0:
+            if len(value) == 1:
+                return ''  # Return empty string, not None
+            else:
+                return value[1:]  # Return substring from index 1
+        return ''   # Return empty string if no rest exists
     
     def _builtin_conc(self, s, t):
         """Built-in Conc function (concatenation)."""
@@ -180,64 +191,20 @@ class CSEMachine:
             condition = node.left
             true_branch = node.left.right
             false_branch = node.left.right.right
-
-            def handle_lambda(c_node, c_cs):
-                if c_node.left.value == ',':
-                    # Lambda with multiple parameters
-                    params = []
-                    current = c_node.left.left
-                    while current:
-                        params.append(current.value)
-                        current = current.right
-                    c_cs.append(Closure(self.last_cs_id, params, 'lambda', None))
-                else:
-                    c_cs.append(Closure(self.last_cs_id, [c_node.left.value], 'lambda', None))
-                
-                lambda_cs_id = self.last_cs_id
-                self.last_cs_id += 1
-                new_cs = []
-                self.generate_control_structure(c_node.left.right, new_cs)
-                self.control_structures[lambda_cs_id] = ControlStructure(lambda_cs_id, new_cs)
-
-            def handle_tau(c_node):
-                num_children = 0
-                child = c_node.left
-                while child:
-                    num_children += 1
-                    child = child.right
-                return f"tau_{num_children}"
+            node.left.right.right = None  # Disconnect the false part of the condition
+            node.left.right = None  # Disconnect the true part of the condition
 
             # B
             condition_cs = []
-            if condition.value == 'lambda':
-                handle_lambda(condition, condition_cs)
-            elif condition.value == 'tau':
-                condition_cs.append(handle_tau(condition))
-                self.generate_control_structure(condition.left, condition_cs)
-            else:
-                condition_cs.append(condition.value)
-                self.generate_control_structure(condition.left, condition_cs)
+            self.generate_control_structure(condition, condition_cs)
             
             # delta_true
             true_cs = []
-            if true_branch.value == 'lambda':
-                handle_lambda(true_branch, true_cs)
-            elif true_branch.value == 'tau':
-                true_cs.append(handle_tau(true_branch))
-                self.generate_control_structure(true_branch.left, true_cs)
-            else:
-                true_cs.append(true_branch.value)
-                self.generate_control_structure(true_branch.left, true_cs)
+            self.generate_control_structure(true_branch, true_cs)
 
             # delta_false
             false_cs = []
-            if false_branch.value == 'lambda':
-                handle_lambda(false_branch, false_cs)
-            elif false_branch.value == 'tau':
-                false_cs.append(handle_tau(false_branch))
-                self.generate_control_structure(false_branch.left, false_cs)
-            else:
-                self.generate_control_structure(false_branch.left, false_cs)
+            self.generate_control_structure(false_branch, false_cs)
 
             self.control_structures[self.last_cs_id] = ControlStructure(self.last_cs_id, true_cs)
             cs.append(f"delta_{self.last_cs_id}_t")
@@ -277,6 +244,10 @@ class CSEMachine:
             f.write('')
         with open('src/cse_machine/csem_output/stack.txt', 'w') as f:
             f.write('')
+
+        if self.control_stack is None or len(self.control_stack) == 0:
+            print("Control stack is empty. Nothing to evaluate.")
+            return None
             
         while self.control_stack:
             self.apply_rule()
@@ -294,9 +265,9 @@ class CSEMachine:
         if len(self.value_stack) != 1:
             raise ValueError("Evaluation did not result in a single value on the value stack.")
         
-        result = self.value_stack[-1]
-        if isinstance(result, Tuple):
-            return f"({', '.join(str(v) for v in result.values)})"
+        # result = self.value_stack[-1]
+        # if isinstance(result, Tuple):
+        #     return f"({', '.join(str(v) for v in result.values)})"
 
         return self.value_stack.pop()
 
@@ -323,16 +294,32 @@ class CSEMachine:
             self.control_stack.pop()
 
         elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top.startswith('<STR:'):
-            str_value = control_stack_top[5:-1]
+            str_value = control_stack_top[6:-2]
             self.value_stack.append(str_value)
             self.control_stack.pop()
         
-        elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'true':
+        elif control_stack_top and isinstance(control_stack_top, str) and (control_stack_top == 'true'):
             self.value_stack.append(True)
             self.control_stack.pop()
         
-        elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'false':
+        elif control_stack_top and isinstance(control_stack_top, str) and (control_stack_top == 'false'):
             self.value_stack.append(False)
+            self.control_stack.pop()
+        
+        elif control_stack_top and isinstance(control_stack_top, bool):
+            self.value_stack.append(control_stack_top)
+            self.control_stack.pop()
+        
+        elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'nil':
+            self.value_stack.append('nil')
+            self.control_stack.pop()
+
+        elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'Y_star':
+            self.value_stack.append('Y_star')
+            self.control_stack.pop()
+
+        elif control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'dummy':
+            self.value_stack.append('dummy')
             self.control_stack.pop()
 
         # Rule 2 - Stack lambda
@@ -365,7 +352,7 @@ class CSEMachine:
 
         # Rule 4 (and 11) - Apply lambda
         elif (control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'gamma' 
-            and value_stack_top and isinstance(value_stack_top, Closure)):
+            and value_stack_top and isinstance(value_stack_top, Closure) and value_stack_top.type == 'lambda'):
             
             closure = value_stack_top
             self.value_stack.pop()
@@ -448,7 +435,7 @@ class CSEMachine:
                 elif operator == '**':
                     result = left ** right
             
-            elif operator in ('gr', 'ge', 'ls', 'le', 'eq', 'ne', '>', '>=', '<', '<='):
+            elif operator in ('gr', 'ge', 'ls', 'le', '>', '>=', '<', '<='):
                 if not isinstance(left, (int, float)) or not isinstance(right, (int, float)):
                     raise TypeError(f"(Rule 6) Expected numeric values for operator '{operator}'.")
                 if operator == 'gr' or operator == '>':
@@ -459,7 +446,9 @@ class CSEMachine:
                     result = left < right
                 elif operator == 'le' or operator == '<=':
                     result = left <= right
-                elif operator == 'eq':
+            
+            elif operator in ('eq', 'ne'):
+                if operator == 'eq':
                     result = left == right
                 elif operator == 'ne':
                     result = left != right
@@ -473,11 +462,15 @@ class CSEMachine:
                     result = left or right
 
             elif operator == 'aug':
-                if not isinstance(left, Tuple) or not isinstance(right, (int, str)):
+                if not (isinstance(left, Tuple) or (isinstance(left, str) and left == 'nil')) or not isinstance(right, (int, str)):
                     raise TypeError(f"(Rule 6) Expected a tuple and a string or number for operator '{operator}'.")
                 
-                left.values.append(right)
-                result = left
+                if isinstance(left, str) and left == 'nil':
+                    result = Tuple([right])
+
+                else:
+                    left.values.append(right)
+                    result = left
             
             else:
                 raise ValueError(f"(Rule 6) Unknown operator '{operator}'.")
@@ -557,37 +550,29 @@ class CSEMachine:
 
         # Rule 11 - n-ary functions params handling
         # Already done under Rule - 4
-        # Need to verify later
 
         # Rule 12 - Applying Y (Related to recursion)
-        # Will implement later
+        elif (control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'gamma'
+              and value_stack_top and isinstance(value_stack_top, str) and value_stack_top == 'Y_star'):
+            self.control_stack.pop() # Pops 'gamma'
+            self.value_stack.pop()   # Pops 'Y_star'
+
+            if isinstance(self.value_stack[-1], Closure):
+                closure = self.value_stack.pop()
+                eta = Closure(closure.cs_id, closure.params, 'eta', closure.env)
+                self.value_stack.append(eta)
+            else:
+                raise ValueError("(Rule 12) Expected a lambda closure on the value stack for Y application.")
 
         # Rule 13 - Appplying F to YF (Related to recursion)
-        # Will implement later
+        elif (control_stack_top and isinstance(control_stack_top, str) and control_stack_top == 'gamma'
+              and value_stack_top and isinstance(value_stack_top, Closure) and value_stack_top.type == 'eta'):
+            self.control_stack.append('gamma') # Put another 'gamma'
+            eta = value_stack_top
+            lambda_ = Closure(eta.cs_id, eta.params, 'lambda', eta.env)
+            self.value_stack.append(lambda_)
 
-                
-        
-
-
-
-
-
-
-
-            
+        else:
+            raise ValueError(f"Control stack has {control_stack_top}. No CSE Rule to handle this.")
             
 
-
-    
-
-
-        
-
-
-
-
-
-
-
-
-    
