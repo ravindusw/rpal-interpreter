@@ -1,0 +1,3 @@
+let T = ( 1, (2,3), ('a', 4)) 
+   	in Print (T 2)
+    	// Output: (2,3)

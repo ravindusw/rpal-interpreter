@@ -65,8 +65,9 @@ class LexicalAnalyzer:
             return self.scan_token()
         
         # Handle strings
-        if char == '"':
-            string_literal = self.consume_string()
+        if char == '"' or char == "'":
+            start = char
+            string_literal = self.consume_string(char)
             self.tokens.append(Token(TokenType.STRING, string_literal, line, column))
             return self.tokens[-1]
         
@@ -157,18 +158,18 @@ class LexicalAnalyzer:
             # Handle unexpected characters
             raise ValueError(f"Unexpected character '{char}' at line {line}, column {column}")
         
-    def consume_string(self):
+    def consume_string(self, start_char):
         """
         Consume a string literal from the source code.
 
         Returns:
             str: The string literal found.
         """
-        string_literal = '"'
+        string_literal = "'"
         while True:
             char = self.scanner.advance()
-            if char == '"':
-                string_literal += '"'
+            if char == start_char:
+                string_literal += "'"
                 break
             elif char is None:
                 raise ValueError("Unterminated string literal")
