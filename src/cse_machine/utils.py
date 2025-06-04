@@ -12,7 +12,7 @@ class Environment:
             parent (Environment, optional): The parent environment. Defaults to None.
         """
         self.bindings = {} # Dictionary to hold variable bindings
-        self.parent = parent # Parent environemeent for scoping
+        self.parent = parent # Parent environment for scoping
         self.env_id = id # Unique identifier for the environment
 
     def __repr__(self):

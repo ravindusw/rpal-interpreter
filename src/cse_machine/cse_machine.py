@@ -62,12 +62,18 @@ class CSEMachine:
     
     def _builtin_print(self, value):
         """Built-in Print function."""
+        # Pass for now due to submission guidelines.
+        # Uncomment print statements within this function otherwise
+
         if value is None:
-            print("nil")
+            pass
+            # print("nil")
         elif isinstance(value, Tuple):
-            print(f"({', '.join(str(v) for v in value.values)})")
+            pass
+            # print(f"({', '.join(str(v) for v in value.values)})")
         else:
-            print(value)
+            pass
+            # print(value)
         return value  # Print returns the value it prints
     
     def _builtin_isinteger(self, value):
@@ -173,7 +179,7 @@ class CSEMachine:
                 while current:
                     params.append(current.value)
                     current = current.right
-                print("params: ", params)
+                # print("params: ", params)
                 cs.append(Closure(self.last_cs_id, params, 'lambda', None))
             else:
                 cs.append(Closure(self.last_cs_id, [node.left.value], 'lambda', None))
@@ -579,4 +585,11 @@ class CSEMachine:
 
         else:
             raise ValueError(f"Control stack has {control_stack_top}. No CSE Rule to handle this.")
-            
+        
+
+
+def main():
+    pass
+
+if __name__ == "__main__":
+    main()
