@@ -42,7 +42,7 @@ This project implements a complete interpreter for RPAL (Right-reference Pedagog
 ### Installation Steps
 1. Clone or download the project:
 ```bash
-git clone <repository-url>
+git clone https://github.com/ravindusw/rpal-interpreter.git
 cd rpal-interpreter
 ```
 
@@ -308,6 +308,18 @@ python myrpal.py -ast examples/sample5.txt
 4. Add test cases for new features
 5. Ensure all existing tests pass
 6. Submit a pull request with detailed description
+
+## Found a Bug? or Need Help?
+
+If you encounter any issues or bugs, please open an issue on the GitHub repository with the following details:
+
+- Description of the issue
+- Steps to reproduce
+- Expected vs actual behavior
+- Any relevant code snippets or examples
+- Environment details (Python version, OS, etc.)
+
+Alternatively, do not hesitate to reach out via email at `[will update later]` for any questions or clarifications.
 
 ## License
 
