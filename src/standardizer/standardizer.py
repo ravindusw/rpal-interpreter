@@ -162,7 +162,7 @@ class Standardizer:
         #    x   E             x     P
 
         if node is None or node.left is None or node.left.right is None or node.left.left is None or node.left.left.right is None:
-            print("Invalid 'let' node structure")
+            # print("Invalid 'let' node structure")
             return node
         
         if node.value != 'let':
@@ -202,7 +202,7 @@ class Standardizer:
         #        x   E          x     P
 
         if node is None or node.left is None or node.left.right is None or node.left.right.left is None or node.left.right.left.right is None:
-            print("Invalid 'where' node structure")
+            # print("Invalid 'where' node structure")
             return node
         
         if node.value != 'where':
@@ -243,7 +243,7 @@ class Standardizer:
         #                                       V  .E
 
         if node is None or node.left is None or node.left.right is None or node.left.right.right is None:
-            print("Invalid function form node structure")
+            # print("Invalid function form node structure")
             return node
         
         if node.value != 'function_form':
@@ -285,7 +285,7 @@ class Standardizer:
         #     V++       E    =>      V         .E
 
         if node is None or node.left is None or node.left.right is None or node.left.right.right is None:
-            print("Invalid multi-parameter function node structure")
+            # print("Invalid multi-parameter function node structure")
             return node
         
         if node.value != 'lambda':
@@ -330,7 +330,7 @@ class Standardizer:
         if (node is None or node.left is None or node.left.right is None 
             or node.left.left is None or node.left.left.right is None or
             node.left.right.left is None or node.left.right.left.right is None):
-            print("Invalid 'within' node structure")
+            # print("Invalid 'within' node structure")
             return node
         
         if node.value != 'within':
@@ -372,7 +372,7 @@ class Standardizer:
         #                        N    E1
 
         if node is None or node.left is None or node.left.right is None or node.left.right.right is None:
-            print("Invalid '@' node structure")
+            # print("Invalid '@' node structure")
             return node
         
         if node.value != '@':
@@ -411,7 +411,7 @@ class Standardizer:
         if (node is None or node.left is None or node.left.right is None 
            or node.left.left is None or node.left.left.right is None
            or node.left.right.left is None or node.left.right.left.right is None):
-            print("Invalid simultaneous definitions node structure")
+            # print("Invalid simultaneous definitions node structure")
             return node
         
         if node.value != 'and':
@@ -461,7 +461,7 @@ class Standardizer:
         #                                x      E
 
         if node is None or node.left is None or node.left.left is None or node.left.left.right is None:
-            print("Invalid 'rec' node structure")
+            # print("Invalid 'rec' node structure")
             return node
         
         if node.value != 'rec':

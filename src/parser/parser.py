@@ -463,7 +463,7 @@ class Parser:
         elif token.token_type == TokenType.FALSE:
             # Rn -> false
             self.consume_token()
-            print("Rn -> false")
+            # print("Rn -> false")
             self.build_tree("false", 0)
         elif token.token_type == TokenType.NIL:
             # Rn -> nil

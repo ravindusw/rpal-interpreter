@@ -3,3 +3,5 @@ __pycache__/
 *$py.class
 
 src/cse_machine/csem_output/
+
+report.txt

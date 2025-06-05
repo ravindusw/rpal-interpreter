@@ -22,6 +22,7 @@ help:
     @echo "Available targets:"
     @echo "  run FILE=<filename>     - Run interpreter on specified file"
     @echo "  ast FILE=<filename>     - Print AST for specified file"
+    @echo "  st FILE=<filename>      - Print ST for specified file"
     @echo "  test                    - Run all test files"
     @echo "  clean                   - Clean generated files"
     @echo "  install                 - Install dependencies (if any)"
@@ -30,6 +31,7 @@ help:
     @echo "Examples:"
     @echo "  make run FILE=examples/sample1.txt"
     @echo "  make ast FILE=examples/sample1.txt"
+    @echo "  make st FILE=examples/sample1.txt"
     @echo "  make test"
 
 # Run the interpreter on a specific file
@@ -52,6 +54,16 @@ ast:
     fi
     $(PYTHON) $(MAIN_SCRIPT) -ast $(FILE)
 
+# Print standardized tree for a specific file
+.PHONY: st
+st:
+    @if [ -z "$(FILE)" ]; then \
+        echo "Error: Please specify FILE=<filename>"; \
+        echo "Example: make st FILE=examples/sample1.txt"; \
+        exit 1; \
+    fi
+    $(PYTHON) $(MAIN_SCRIPT) -st $(FILE)
+
 # Run tests on all example files
 .PHONY: test
 test:
@@ -72,6 +84,18 @@ test-ast:
         if [ -f "$$file" ]; then \
             echo "AST for: $$file"; \
             $(PYTHON) $(MAIN_SCRIPT) -ast "$$file" || echo "Failed: $$file"; \
+            echo ""; \
+        fi \
+    done
+
+# Test standardized tree generation for all files
+.PHONY: test-st
+test-st:
+    @echo "Generating standardized trees for all example files..."
+    @for file in $(EXAMPLES_DIR)/*.txt; do \
+        if [ -f "$$file" ]; then \
+            echo "Standardized tree for: $$file"; \
+            $(PYTHON) $(MAIN_SCRIPT) -st "$$file" || echo "Failed: $$file"; \
             echo ""; \
         fi \
     done
