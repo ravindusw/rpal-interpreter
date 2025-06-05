@@ -83,6 +83,9 @@ python myrpal.py examples/sample1.txt
 
 # Display Abstract Syntax Tree only
 python myrpal.py -ast examples/sample1.txt
+
+# Display Standardized Tree only
+python myrpal.py -st examples/sample1.txt
 ```
 
 #### Using Makefile (Alternative)
@@ -92,6 +95,9 @@ make run FILE=examples/sample1.txt
 
 # Display AST
 make ast FILE=examples/sample1.txt
+
+# Display Standardized Tree
+make st FILE=examples/sample1.txt
 
 # Run all test files
 make test

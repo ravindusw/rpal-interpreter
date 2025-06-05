@@ -143,6 +143,8 @@ class CSEMachine:
             return len(value) == 0
         elif value is None:
             return True
+        elif value == "nil":
+            return True
         else:
             return False
 
@@ -352,6 +354,12 @@ class CSEMachine:
                 # Variable arity function, pop all arguments until we hit a non-argument
                 while self.value_stack and isinstance(self.value_stack[-1], (int, str, bool, Tuple, Closure)):
                     args.append(self.value_stack.pop())
+            elif isinstance(self.value_stack[-1], Tuple) and (builtin_function.name != "Istuple" and builtin_function.name != "Order" and builtin_function.name != "Null"):
+                tuple = self.value_stack.pop().values
+                for _ in range(builtin_function.arity):
+                    if not tuple[_]:
+                        raise ValueError(f"(Rule 3) Not enough arguments for function '{builtin_function.name}'. Expected {builtin_function.arity}, found {len(args)}.")
+                    args.append(tuple[_])
             else:
                 for _ in range(builtin_function.arity):
                     if not self.value_stack:
@@ -584,7 +592,7 @@ class CSEMachine:
             self.value_stack.append(lambda_)
 
         else:
-            raise ValueError(f"Control stack has {control_stack_top}. No CSE Rule to handle this.")
+            raise ValueError(f"Control stack has '{control_stack_top}' and value stack has '{value_stack_top}'. No CSE Rule to handle this.")
         
 
 

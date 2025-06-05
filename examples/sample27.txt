@@ -1,0 +1,2 @@
+let a = "Hello" and b = "World" in
+let c = Conc (a , b) in Print (c)
