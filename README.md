@@ -298,12 +298,15 @@ These files are useful for debugging and understanding program execution flow.
 ```bash
 make test          # Run all example files
 make test-ast      # Generate AST for all files
+make test-st       # Generate ST for all files
 ```
 
 ### Individual File Testing
+Replace the file name with the required file
 ```bash
 python myrpal.py examples/sample1.txt
 python myrpal.py -ast examples/sample5.txt
+python myrpal.py -st examples/sample8.txt
 ```
 
 ## Contributing
