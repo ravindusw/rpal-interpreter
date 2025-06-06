@@ -77,19 +77,6 @@ rpal-interpreter/
 ### Command Line Interface
 
 #### Basic Usage
-
-> [!note]
-> Please note that depending on your system configuration, you may need to use `python3` instead of `python` to run the interpreter. If you encounter issues with the Python command, try:
-> ```bash
-> python3 myrpal.py examples/sample1.txt
-> ```
-> 
-> If using the Makefile, you can modify it to use python3 by changing the PYTHON variable at the top of the Makefile:
-> ```makefile
-> # Change this line in the Makefile
-> PYTHON = python3
-> ```
-
 ```bash
 # Run interpreter on a file
 python myrpal.py examples/sample1.txt
@@ -118,6 +105,18 @@ make test
 # Clean generated files
 make clean
 ```
+
+> [!note]
+> Please note that depending on your system configuration, you may need to use `python3` instead of `python` to run the interpreter. If you encounter issues with the Python command, try:
+> ```bash
+> python3 myrpal.py examples/sample1.txt
+> ```
+> 
+> If using the Makefile, you can modify it to use python3 by changing the PYTHON variable at the top of the Makefile:
+> ```makefile
+> # Change this line in the Makefile
+> PYTHON = python3
+> ```
 
 ### Sample Programs
 
@@ -310,8 +309,8 @@ These files are useful for debugging and understanding program execution flow.
 ### Run All Tests
 ```bash
 make test          # Run all example files
-make test-ast      # Generate AST for all files
-make test-st       # Generate ST for all files
+make test-ast      # Generate AST for all example files
+make test-st       # Generate ST for all example files
 ```
 
 ### Individual File Testing
