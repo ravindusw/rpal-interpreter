@@ -321,14 +321,14 @@ python myrpal.py -ast examples/sample5.txt
 python myrpal.py -st examples/sample8.txt
 ```
 
-## Contributing
+<!--- ## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/new-feature`)
 3. Make your changes with proper documentation
 4. Add test cases for new features
 5. Ensure all existing tests pass
-6. Submit a pull request with detailed description
+6. Submit a pull request with detailed description --->
 
 ## Found a Bug? or Need Help?
 
@@ -340,16 +340,9 @@ If you encounter any issues or bugs, please open an issue on the GitHub reposito
 - Any relevant code snippets or examples
 - Environment details (Python version, OS, etc.)
 
-Alternatively, do not hesitate to reach out via email at `[will update later]` for any questions or clarifications.
+Alternatively, do not hesitate to reach out for any questions or clarifications.
 
 ## License
 
 This project is developed for educational purposes as part of CS3513 Programming Languages course at University of Moratuwa.
 
-## References
-
-- RPAL Language Specification
-- Functional Programming Language Implementation
-- Control-Stack-Environment Machine Architecture
-- Recursive Descent Parsing Techniques
-- Lambda Calculus and Combinatory Logic
